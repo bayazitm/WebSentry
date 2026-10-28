@@ -1,105 +1,91 @@
 # WebSentry
 
-An English-language desktop HTTP security header analyzer with evidence-based
-findings and self-contained HTML/JSON reports.
+WebSentry checks a website's HTTP response headers for common security configuration issues. It shows the observed values, explains each finding, and exports the results as HTML or JSON.
 
-![WebSentry desktop interface](docs/screenshot.png)
+![WebSentry](docs/screenshot.png)
 
-## Windows app
+## Features
 
-Extract the **entire** portable Windows ZIP into a new folder and open
-`WebSentry/WebSentry.exe`. Keep `_internal` beside the executable. Python is
-included; no separate installation is required.
+- Inspect a URL and record its redirect chain.
+- Check HTTPS, HSTS, CSP, framing restrictions, and other response headers.
+- Filter findings by status and view recommendations with technical references.
+- Export an HTML report for reading and printing, or JSON for further processing.
+- Run through the desktop interface or command line.
 
-Enter a website URL and select **Analyze**. A scheme-less hostname defaults to
-HTTPS. Select a finding for its observed value, explanation, suggested action
-and technical reference. Status filters narrow the finding list.
+## Getting started
 
-**Export HTML** creates an offline report that can be opened in a browser or
-printed to PDF. **Export JSON** produces machine-readable data. Exports only
-become available after a completed scan. Reports are saved to your chosen path;
-exporting to an existing filename replaces it after the file dialog confirms.
-
-## Run from source
-
-Python 3.10+ is required; tested with Python 3.14.6 on Windows. On Windows:
+Requires Python 3.10 or later. Run these commands on Windows:
 
 ```powershell
-py -3 -m venv .venv
+git clone https://github.com/bayazitm/WebSentry.git
+cd WebSentry
+python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe main.py
 ```
 
-To update the earlier tutorial project, close it and copy these source files
-into its folder. Keep the existing `.venv`, then run the last two commands.
-`test_checks.py` is now a launcher for the complete test suite. The original
-tutorial code is preserved in `learning_original` for reference.
+Enter a URL and click **Analyze**. If the address has no scheme, WebSentry tries HTTPS. Select a finding to see its evidence, explanation, and recommended action.
 
-## What it checks
+For a packaged Windows build, extract the entire application folder and open `WebSentry.exe`. Keep the `_internal` folder beside the executable. A separate Python installation is not needed for that build.
 
-| Control | Interpretation |
+## Checks
+
+| Control | What is checked |
 | --- | --- |
-| HTTPS | Verified HTTPS final response and HTTPS-to-HTTP redirect downgrades |
-| HSTS | HTTPS/domain applicability, duplicate headers/directives, numeric max-age, disabled policy and lifetime |
-| X-Content-Type-Options | A single expected nosniff value |
-| Content-Type | A single declared media type; body/type agreement is not tested |
-| CSP | Enforced versus report-only, selected script/object source heuristics and duplicate directives |
-| Embedding protection | Enforced frame-ancestors with X-Frame-Options fallback; default-src is not treated as frame-ancestors |
-| Referrer-Policy | Last recognized fallback token; browser defaults are acknowledged |
-| Permissions-Policy | Contextual feature-permission configuration, not a complete syntax validator |
-| Server disclosure | Server, X-Powered-By and X-AspNet-Version information |
-| Legacy XSS filter | Deprecated X-XSS-Protection is not a required modern control |
+| HTTPS | Final connection security and HTTPS-to-HTTP redirect downgrades |
+| Strict-Transport-Security | Applicability, duplicate or malformed directives, `max-age`, and disabled policies |
+| X-Content-Type-Options | Presence of a single `nosniff` value |
+| Content-Type | Presence and format of the declared media type |
+| Content-Security-Policy | Enforced versus report-only policies and selected script/object source restrictions |
+| Framing restrictions | CSP `frame-ancestors` and fallback to `X-Frame-Options` |
+| Referrer-Policy | Recognized policy values and fallback ordering |
+| Permissions-Policy | Presence of a feature-permissions policy for deployment review |
+| Server information | Common technology and version-disclosure headers |
+| X-XSS-Protection | Use of the deprecated browser XSS filter |
 
-The 180-day HSTS lifetime threshold is a review heuristic, not a protocol
-validity rule. Multiple enforced CSP policies combine restrictively; concerns
-found in one policy can be mitigated by another. CSP analysis is deliberately
-described as a heuristic rather than a full browser-policy evaluation.
+The HSTS lifetime check uses 180 days as a review threshold, not a protocol requirement. CSP and Permissions-Policy checks do not replace a full policy review.
 
-### Statuses
+## Reading the results
 
-- **Pass:** The specific check observed its expected condition.
-- **Warning:** A missing or risky configuration was observed.
-- **Review:** Interpretation needs syntax or application/deployment context.
-- **Info:** Optional hardening or explanatory information.
-- **Not applicable:** A check does not apply to this response.
+| Status | Meaning |
+| --- | --- |
+| Pass | The check found its expected condition. |
+| Warning | A missing or potentially risky configuration was observed. |
+| Review | The result needs further interpretation or application context. |
+| Info | Background information or an optional hardening observation. |
+| Not applicable | The check does not apply to this response. |
 
-Counts are not an overall site-security score or a vulnerability count.
+These are configuration findings, not confirmed vulnerabilities. The summary counts are not an overall security score.
 
-## Scope and data handling
+## Reports
 
-- One ordinary GET request per redirect hop; maximum eight redirects.
-- The response body is not downloaded for analysis. No crawling, browser
-  execution, authentication or exploit testing occurs.
-- Only the final response headers are assessed. Intermediate responses are
-  recorded as a URL/status chain rather than separately scored.
-- HTTP error/challenge pages are labeled as that response's results; they do
-  not establish the application's normal configuration.
-- HTTPS certificate verification remains enabled. Certificate failures stop
-  analysis instead of producing a misleading missing-header report.
-- Cookies are not replayed between redirect hops. Browser sessions, `.netrc`
-  credentials and system proxy settings are not imported.
-- Cookie/authorization/token-like response headers and URL query values are
-  redacted from displayed/exported results. URL paths remain visible.
-- No scan history, account or telemetry is included. Only explicit exports
-  save reports. Nothing is uploaded to a WebSentry service.
-- Cancellation is cooperative. An in-flight connection must return or time
-  out before the worker stops. Connect/read timeouts are not hard total-scan
-  deadlines, and operating-system DNS resolution can take longer.
+Use **Export HTML** or **Export JSON** after a completed analysis. HTML reports can be opened offline in a browser and printed to PDF. A [sample report](docs/example-report.html) is included using synthetic data.
 
-Missing response headers alone do not prove an exploitable vulnerability.
-HTML meta policies, browser state, parent-domain/preloaded HSTS and other
-resources can change real-world behavior and are not measured here. HTML-only
-checks are skipped when the declared content type is not HTML.
+Reports include the requested and final URLs, scan time, HTTP status, redirect chain, response headers, and findings. URL query values and selected sensitive headers are redacted; URL paths remain visible.
 
 ## Command line
 
+Print a JSON report:
+
 ```powershell
 .\.venv\Scripts\python.exe main.py --cli https://example.com
+```
+
+Save an HTML report:
+
+```powershell
 .\.venv\Scripts\python.exe main.py --cli https://example.com --format html --output report.html
 ```
 
-Use the Python entry point for terminal output; the portable EXE is a windowed
-application without an attached console.
+Use the Python entry point for terminal output. The packaged Windows executable launches without a console.
+
+## Scope
+
+WebSentry evaluates the final HTTP response headers. It records intermediate redirects but does not separately assess their headers. It does not crawl the site, execute JavaScript, inspect HTML meta policies, or test exploits.
+
+Missing headers do not prove that a site is exploitable, and passing the checks does not establish that a site is secure or trustworthy. Browser state, HSTS preload lists, parent-domain policies, and other resources can affect actual behavior. Error or challenge responses are identified in the report and may differ from the site's normal pages.
+
+Certificate verification remains enabled. Browser sessions, stored credentials, and system proxy settings are not imported. Scans run locally, and reports are saved only when exported. Cancellation waits for any in-progress network operation to finish or time out.
 
 ## Tests
 
@@ -107,34 +93,17 @@ application without an attached console.
 .\.venv\Scripts\python.exe test_checks.py
 ```
 
-The suite uses synthetic policies and a local HTTP server. It covers disabled
-and malformed HSTS, report-only CSP, multiple policies, frame-ancestors/XFO
-interaction, non-HTML applicability, MIME protections, referrer fallback,
-redirect loops, cancellation, redaction and HTML escaping/atomic exports.
+Tests cover header rules, redirect handling, non-HTML responses, cancellation, redaction, and report escaping. Network-related tests use a local HTTP server.
 
-Live smoke checks were also performed against example.com, python.org and MDN.
-They are validation targets, not bundled scan results or default accounts.
+## Windows build
 
-## Project structure
-
-```text
-main.py              Desktop/CLI entry point
-engine.py            URL validation, fetching and security checks
-gui.py               Desktop interface and background job lifecycle
-reports.py           Escaped HTML rendering and atomic JSON/HTML export
-tests/               Automated checks with a local fixture server
-assets/              Original SVG/PNG/ICO application icon
-learning_original/   Earlier tutorial code, retained for study
-build_windows.ps1    Portable Windows build
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build_windows.ps1
 ```
 
-Run `build_windows.ps1` to create `dist/WebSentry`. Distribute the entire output
-folder. The source runtime dependencies are pinned/constrained in
-`requirements.txt`; see `THIRD_PARTY.md` for upstream projects and licenses.
+The application is created in `dist/WebSentry`. Distribute the whole folder, including `_internal`. See [THIRD_PARTY.md](THIRD_PARTY.md) for dependency information.
 
 ## References
 
-- [OWASP Secure Headers](https://secure-headers-project.owasp.org/response-headers/)
+- [OWASP Secure Headers Project](https://secure-headers-project.owasp.org/response-headers/)
 - [MDN HTTP headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers)
-- [MDN HSTS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security)
-- [MDN CSP frame-ancestors](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors)
