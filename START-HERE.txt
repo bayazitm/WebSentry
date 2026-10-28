@@ -1,0 +1,21 @@
+WebSentry
+
+WINDOWS APPLICATION
+Extract the entire Windows ZIP into a new folder.
+Open WebSentry/WebSentry.exe. Keep _internal beside the EXE.
+Enter a website URL and select Analyze.
+Select a finding to see its evidence, meaning and recommended action.
+Use Export HTML or Export JSON to save your report.
+
+SOURCE CODE
+Copy the source package into your project folder, replacing matching files.
+Keep your existing .venv folder. From that folder, run in PowerShell:
+
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe main.py
+
+The old tutorial files are retained under learning_original for reference.
+test_checks.py now runs the full test suite.
+
+An absent header does not prove an exploitable vulnerability. Read each
+finding and the report scope. This app inspects HTTP response headers only.

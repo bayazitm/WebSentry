@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>WebSentry — Header inspection report</title><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0e1118;color:#e8edf5;font:15px/1.65 system-ui,Segoe UI,sans-serif}
+main{max-width:1120px;margin:0 auto;padding:48px 24px}header{border-bottom:1px solid #303747;padding-bottom:24px}h1{font-size:30px;margin:0}h2{font-size:23px}h3{font-size:18px}h4{font-size:13px;color:#a6b3ca;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.muted{color:#a6b3ca}.stats{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0}.stat{flex:1;min-width:135px;background:#19202d;border:1px solid #303747;padding:20px;border-radius:14px}.stat strong{display:block;font-size:30px}.stat span{color:#adb8c9}
+article{padding:26px;margin:16px 0;background:#151c28;border:1px solid #303747;border-radius:14px}article h2{margin-top:0}a{color:#bdadff}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0e141e;border-radius:8px;padding:14px;font:13px/1.6 Consolas,monospace}table{border-collapse:collapse;width:100%;table-layout:fixed}th,td{text-align:left;padding:8px;vertical-align:top;border-bottom:1px solid #303747;overflow-wrap:anywhere}th{width:28%}td pre{margin:0}.code{color:#bdadff;font-weight:bold}li{margin:8px 0;overflow-wrap:anywhere}.url{overflow-wrap:anywhere}footer{margin-top:40px;color:#a6b3ca;font-size:13px}
+@media print{:root{color-scheme:light}body{background:white;color:#111}main{padding:12px}article,.stat{background:white;border-color:#aaa}pre{background:#f2f3f5;color:#111}.muted,h4,.stat span,footer{color:#444}article{break-inside:avoid}a{color:#353077}}
+</style></head><body><main><header><p class="muted">WEB SECURITY / RESPONSE HEADERS</p><h1>WebSentry</h1>
+<p class="url">https://demo.example.test/</p><p class="muted">2026-10-28T19:27:10+00:00 · HTTP 200 · text/html · 0 ms</p>
+<p class="muted url">Requested: https://demo.example.test/</p></header>
+<div class="stats"><div class="stat"><strong style="color:#74dfb1">3</strong><span>Pass</span></div><div class="stat"><strong style="color:#ffb589">3</strong><span>Warning</span></div><div class="stat"><strong style="color:#e7ce7a">1</strong><span>Review</span></div><div class="stat"><strong style="color:#9fc7ff">3</strong><span>Info</span></div><div class="stat"><strong style="color:#a5aaba">0</strong><span>Not applicable</span></div></div><p class="muted">Counts describe the configured checks, not an overall security score.</p>
+<h2>Findings</h2><article><h2>HTTPS</h2>
+<p style="color:#74dfb1">Pass · Informational</p>
+<h3>Final response received over verified HTTPS</h3><h4>Observed evidence</h4>
+<pre>https://demo.example.test/</pre><h4>What this means</h4>
+<p>HTTPS certificate verification stayed enabled. This is not a comprehensive TLS/cipher/certificate audit.</p><h4>Suggested action</h4>
+<p>Continue to maintain valid HTTPS certificates.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security">Technical reference ↗</a></p></article><article><h2>Strict-Transport-Security</h2>
+<p style="color:#ffb589">Warning · Medium</p>
+<h3>HSTS is explicitly disabled</h3><h4>Observed evidence</h4>
+<pre>[
+  &quot;max-age=0&quot;
+]</pre><h4>What this means</h4>
+<p>max-age=0 asks browsers to remove this host&#x27;s stored HSTS policy. Parent/preload coverage is not measured.</p><h4>Suggested action</h4>
+<p>If disabling HSTS is unintended, deploy an appropriate positive max-age after verifying HTTPS availability.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security">Technical reference ↗</a></p></article><article><h2>X-Content-Type-Options</h2>
+<p style="color:#74dfb1">Pass · Informational</p>
+<h3>nosniff observed</h3><h4>Observed evidence</h4>
+<pre>[
+  &quot;nosniff&quot;
+]</pre><h4>What this means</h4>
+<p>nosniff limits MIME-type guessing. It does not verify that every resource&#x27;s Content-Type is correct.</p><h4>Suggested action</h4>
+<p>Send one X-Content-Type-Options: nosniff header and correct Content-Type values.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options">Technical reference ↗</a></p></article><article><h2>Content-Type</h2>
+<p style="color:#74dfb1">Pass · Informational</p>
+<h3>Content type declared</h3><h4>Observed evidence</h4>
+<pre>[
+  &quot;text/html&quot;
+]</pre><h4>What this means</h4>
+<p>The declared media type determines which browser-oriented checks are relevant. The response body is not inspected to validate the declaration.</p><h4>Suggested action</h4>
+<p>Declare one accurate Content-Type for each resource.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type">Technical reference ↗</a></p></article><article><h2>Content-Security-Policy</h2>
+<p style="color:#ffb589">Warning · Medium</p>
+<h3>No enforced CSP header observed</h3><h4>Observed evidence</h4>
+<pre>[
+  &quot;default-src &#x27;self&#x27;&quot;
+]</pre><h4>What this means</h4>
+<p>A report-only policy does not enforce restrictions.</p><h4>Suggested action</h4>
+<p>Develop and test a policy matching actual scripts, styles, embedded content and resource origins. Use reporting during rollout; do not blindly paste a restrictive policy.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy">Technical reference ↗</a></p></article><article><h2>Embedding protection</h2>
+<p style="color:#ffb589">Warning · Medium</p>
+<h3>No recognized embedding restriction</h3><h4>Observed evidence</h4>
+<pre>{
+  &quot;frame-ancestors&quot;: null,
+  &quot;X-Frame-Options&quot;: null
+}</pre><h4>What this means</h4>
+<p>Neither an enforced restrictive frame-ancestors directive nor one valid X-Frame-Options value was established. This does not demonstrate clickjacking.</p><h4>Suggested action</h4>
+<p>Choose a frame-ancestors allowlist based on legitimate embedding needs; consider X-Frame-Options for legacy clients.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors">Technical reference ↗</a></p></article><article><h2>Referrer-Policy</h2>
+<p style="color:#9fc7ff">Info · Informational</p>
+<h3>No explicit Referrer-Policy</h3><h4>Observed evidence</h4>
+<pre>Not observed</pre><h4>What this means</h4>
+<p>Modern browsers generally default to strict-origin-when-cross-origin. Absence alone does not mean full referrer URLs are exposed.</p><h4>Suggested action</h4>
+<p>Choose an explicit policy matching privacy and navigation requirements; strict-origin-when-cross-origin is a common starting point.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy">Technical reference ↗</a></p></article><article><h2>Permissions-Policy</h2>
+<p style="color:#9fc7ff">Info · Informational</p>
+<h3>No explicit feature-permissions policy</h3><h4>Observed evidence</h4>
+<pre>Not observed</pre><h4>What this means</h4>
+<p>Permissions-Policy controls selected browser features. Header presence does not establish valid syntax, and browser defaults still apply when it is absent.</p><h4>Suggested action</h4>
+<p>Restrict unneeded features such as camera or microphone, while retaining features the application legitimately uses.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy">Technical reference ↗</a></p></article><article><h2>Server information</h2>
+<p style="color:#9fc7ff">Info · Informational</p>
+<h3>No common server identifiers observed</h3><h4>Observed evidence</h4>
+<pre>Not observed</pre><h4>What this means</h4>
+<p>Technology/version banners can help fingerprint a deployment. Removing them does not fix underlying vulnerabilities.</p><h4>Suggested action</h4>
+<p>Remove unnecessary version details where practical and keep the actual software patched.</p>
+<p><a href="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server">Technical reference ↗</a></p></article><article><h2>X-XSS-Protection</h2>
+<p style="color:#e7ce7a">Review · Low</p>
+<h3>Legacy XSS filter is enabled or ambiguous</h3><h4>Observed evidence</h4>
+<pre>[
+  &quot;1; mode=block&quot;
+]</pre><h4>What this means</h4>
+<p>This deprecated header is not required as a modern security control. Some legacy filtering modes can introduce problems.</p><h4>Suggested action</h4>
+<p>Use a tested CSP; do not enable X-XSS-Protection merely to satisfy a header checklist.</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-XSS-Protection">Technical reference ↗</a></p></article><h2>Request chain</h2><ol><li><span class="code">200</span> https://demo.example.test/</li></ol>
+<h2>Response headers</h2><table><tr><th>Content-Type</th><td><pre>text/html</pre></td></tr><tr><th>X-Content-Type-Options</th><td><pre>nosniff</pre></td></tr><tr><th>Strict-Transport-Security</th><td><pre>max-age=0</pre></td></tr><tr><th>Content-Security-Policy-Report-Only</th><td><pre>default-src &#x27;self&#x27;</pre></td></tr><tr><th>X-XSS-Protection</th><td><pre>1; mode=block</pre></td></tr></table><h2>Scope &amp; limitations</h2><ul><li>SYNTHETIC DEMONSTRATION. No website was contacted to create this example.</li><li>Only the final HTTP response headers are assessed; the redirect chain is recorded separately.</li><li>No HTML parsing, JavaScript execution, authentication, crawling or exploit testing is performed.</li><li>A missing header is a hardening observation, not proof of an exploitable vulnerability.</li><li>CSP and Permissions-Policy checks are heuristics, not complete browser policy validators.</li><li>Previously cached HSTS policies, preload lists, parent-domain policies and browser defaults may affect actual protection.</li><li>Cookies, sensitive response headers and URL query values are redacted. URL paths remain visible.</li></ul>
+<footer>WebSentry 1.0.0 · Rules 2026-10-28.1<br>Generated locally. This report contains no remote scripts, fonts or images. Print from your browser to save a PDF.</footer>
+</main></body></html>

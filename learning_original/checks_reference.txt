@@ -1,0 +1,23 @@
+from main import check_content_type_options, check_hsts
+
+assert check_content_type_options(None)["status"] == "Missing"
+assert check_content_type_options("nosniff")["status"] == "Expected value found"
+assert check_content_type_options("wrong-value")["status"] == "Unexpected value"
+assert check_content_type_options(" NOSNIFF ")["status"] == "Expected value found"
+
+missing_result = check_content_type_options(None)
+
+assert missing_result["header"] == "X-Content-Type-Options"
+assert missing_result["observed"] is None
+
+assert check_hsts(None, True)["status"] == "Missing"
+
+assert check_hsts(
+    "max-age=31536000", True
+)["status"] == "Present - value needs review"
+
+assert check_hsts(
+    "max-age=31536000", False
+)["status"] == "Not evaluated over HTTP"
+
+print("All checks passed.")
